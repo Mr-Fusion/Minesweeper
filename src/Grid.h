@@ -26,15 +26,16 @@ class Grid
 
         LTexture spriteSheet;
 
-        //Initialize and create grid
-        Grid(int c, int r, int cw, int rh, LTexture ss){
-            rMax = r;
-            cMax = c;
-            spriteSheet = ss;
-            setDim(cw,rh);
+        ///Constructor Function
+        Grid(){
+            //Initialize the size, location, dimensions and appearance of the grid
+            rMax = GRID_HEIGHT;
+            cMax = GRID_WIDTH;
             setPos(0,0);
+            setDim(TILE_WIDTH,TILE_HEIGHT);
+            //spriteSheet = ss;
 
-
+            //All grid tiles are set to 0 by default
             tiles = new int *[cMax];
             for (int i = 0; i < cMax; i++)
                 tiles[i] = new int[rMax];
@@ -46,21 +47,22 @@ class Grid
             selectTile(0,0);
         }
 
+        ///Deconstructor
         ~Grid(){}
 
-		//Set Grid Position
+		///Set Grid Position
 		void setPos(int x, int y){
 		    xLoc = x;
             yLoc = y;
 		}
 
-		//Set Grid Dimensions
+		///Set Grid Dimensions
 		void setDim(int cw, int rh){
             cWidth = cw;
             rHeight = rh;
 		}
 
-		//check
+		///Check whether mouse is located within input coordinates of grid
 		bool isInside(int x, int y){
             //Mouse is left of the button
             if( x < xLoc )
@@ -68,7 +70,7 @@ class Grid
                 return false;
             }
             //Mouse is right of the button
-            else if( x > xLoc + cMax * cWidth )
+            else if( x >= xLoc + cMax * cWidth )
             {
                 return false;
             }
@@ -78,7 +80,7 @@ class Grid
                 return false;
             }
             //Mouse below the button
-            else if( y > yLoc + rMax * rHeight )
+            else if( y >= yLoc + rMax * rHeight )
             {
                 return false;
             }
@@ -86,18 +88,18 @@ class Grid
                 return true;
 		}
 
-		//Select Grid Coordinate
+		///Select Grid Coordinate
 		void selectTile( int x, int y ){
 		    col = (x - xLoc) / cWidth;
             row = (y - yLoc) / rHeight;
 		}
 
-		//Set Tile sprite
+		///Set Tile sprite
 		void setCurTile(int n){
 		    tiles[col][row] = n;
 		}
 
-		//Handles mouse event
+		///Handles mouse event
 		void handleEvent( SDL_Event* e){
 		    int x, y;
             //If mouse event happened
@@ -109,7 +111,7 @@ class Grid
             }
 		}
 
-		//Render the state of the playing grid
+		///Render the state of the playing grid
         void render( SDL_Rect sprite[]){
             for (int i = 0; i < cMax; i++)
             {
@@ -125,6 +127,7 @@ class Grid
             texture.render( x, y, &sprite[ clip ] );
         }
         */
+
 };
 
 #endif // GRID_H_INCLUDED
