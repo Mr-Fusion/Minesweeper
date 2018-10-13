@@ -56,7 +56,7 @@ bool init()
 		}
 
 		//Create window
-		gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		gWindow = SDL_CreateWindow( "Minesweeper", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( gWindow == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -171,12 +171,7 @@ int main( int argc, char* args[] )
 		else
 		{
             //Initialize Minesweeper Field
-            Minesweeper mineField = Minesweeper(GRID_WIDTH,GRID_HEIGHT,TOTAL_MINES);
-
-		    //Initialize Display Grid
-            Grid testGrid = Grid(GRID_WIDTH,GRID_HEIGHT,TILE_WIDTH,TILE_HEIGHT, gSpriteSheetTexture);
-
-            testGrid.tiles = mineField.fieldVisible;
+            Minesweeper mineField = Minesweeper(gSpriteSheetTexture);
 
 			//Main loop flag
 			bool quit = false;
@@ -188,10 +183,10 @@ int main( int argc, char* args[] )
 			SDL_Event e;
 
 			//While application is running
-//-----[GAME LOOP START!]-----//
+/**-----[GAME LOOP START!]-----**/
 			while( !quit )
 			{
-//-----[INPUT EVENTS]-----//
+/**-----[INPUT EVENTS]-----**/
                 //Handle events on queue
                 while( SDL_PollEvent( &e ) != 0 )
                 {
@@ -201,39 +196,36 @@ int main( int argc, char* args[] )
                         quit = true;
                     }
                     if ( !gameOver){
-                        testGrid.handleEvent( &e );
+                        //testGrid.handleEvent( &e );
                         mineField.handleEvent( &e );
                     }
 
                 }
-//-----[LOGIC HANDLING]-----//
-                /*if (mineField.pressed){
-                    mineField.press(testGrid.col, testGrid.row);
-                }*/
+/**-----[LOGIC HANDLING]-----**/
                 if (mineField.sweepEnable){
-                    if ( !mineField.sweepTile(testGrid.col, testGrid.row) ){
-                        printf("YOU LOSE...");
+                    if ( !mineField.sweepTile(mineField.playField.col, mineField.playField.row) ){
+                        printf("YOU LOSE...\n");
                         gameOver = true;
                     }
                     else{
                         if ( mineField.unexploredTiles == mineField.mines){
-                            printf("YOU WIN!!!");
+                            printf("YOU WIN!!!\n");
                             gameOver = true;
                         }
                     }
                     mineField.sweepEnable = false;
                 }
                 if (mineField.flagEnable){
-                    mineField.mineFlagToggle(testGrid.col, testGrid.row);
+                    mineField.mineFlagToggle(mineField.playField.col, mineField.playField.row);
                     mineField.flagEnable = false;
                 }
-//-----[RENDERING]-----//
+/**-----[RENDERING]-----**/
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
                 SDL_RenderClear( gRenderer );
 
                 //Render Grid
-                testGrid.render( gSpriteClips );
+                mineField.render( gSpriteClips );
 
                 //Update screen
                 SDL_RenderPresent( gRenderer );

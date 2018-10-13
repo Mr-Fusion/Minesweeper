@@ -2,14 +2,14 @@
 #define CONST_H_INCLUDED
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 560;
+const int SCREEN_WIDTH = 990;
+const int SCREEN_HEIGHT = 660;
 
 const int TILE_WIDTH = 33;
 const int TILE_HEIGHT = 33;
 
-const int GRID_HEIGHT = 9;
-const int GRID_WIDTH = 9;
+const int GRID_HEIGHT = 16;
+const int GRID_WIDTH = 30;
 
 const int SPRITE_NUM = 14;
 const int SS_ROWS = 7;
@@ -18,9 +18,9 @@ const int SS_COLUMNS = 2;
 const int SPRITE_HEIGHT = 33;
 const int SPRITE_WIDTH = 33;
 
-const int TOTAL_MINES = 10;
+const int TOTAL_MINES = 99;
 
-enum{EMPTY,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,MINE,UNKNOWN,PRESS,FLAG,WRONG};
+enum{EMPTY,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,MINE,UNKNOWN,PRESS,FLAG,MISPLACED};
 
 enum direction
 {
