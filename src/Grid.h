@@ -1,7 +1,7 @@
 #ifndef GRID_H_INCLUDED
 #define GRID_H_INCLUDED
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "LTexture.h"
 #include "Const.h"
 
@@ -48,7 +48,14 @@ class Grid
         }
 
         ///Deconstructor
-        ~Grid(){}
+        ~Grid(){
+            printf("Grid Object Deconstructing...\n");
+
+            for(int i = 0; i < cMax; ++i) {
+                delete [] tiles[i];
+            }
+            delete [] tiles;
+        }
 
 		///Set Grid Position
 		void setPos(int x, int y){

@@ -1,7 +1,7 @@
 #ifndef MINESWEEPER_H_INCLUDED
 #define MINESWEEPER_H_INCLUDED
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <stdlib.h>
 #include "Const.h"
 #include "Grid.h"
@@ -23,77 +23,91 @@ class Minesweeper
     bool flagEnable;
     bool pressed;
     bool inPlay;
+    bool gameOver;
 
     //LTexture tileset;
+    LTexture gSpriteSheetTexture;
     Grid playField;
 
+    //Test Sprite Clips
+    SDL_Rect gSpriteClips[ SPRITE_NUM ];
+
     ///Constructor Function
-    Minesweeper( LTexture t){
+    Minesweeper(){
 
-        //Initialize playing field dimensions, difficulty, and appearance
-        col = GRID_WIDTH;
-        row = GRID_HEIGHT;
-        mines = TOTAL_MINES;
-        playField.spriteSheet = t;
-        playField.setPos(0,66);
-        //tileset = t;
-
-
-
-        //Initialize unexplored tile counter and event flags
-        unexploredTiles = row * col;
-        sweepEnable = false;
-        flagEnable = false;
-        inPlay = false;
-
-
-        //Initialize visible playing field
-        fieldVisible = new int *[col];
-        for (int i = 0; i < col; i++)
-            fieldVisible[i] = new int[row];
-
-        for (int i = 0; i < col; i++) {
-            for (int j = 0; j < row; j++)
-                fieldVisible[i][j] = UNKNOWN;
+        //Load media
+        if( !loadMedia() )
+        {
+            printf( "Failed to load media!\n" );
         }
+        else
+        {
+            //Initialize playing field dimensions, difficulty, and appearance
+            col = GRID_WIDTH;
+            row = GRID_HEIGHT;
+            mines = TOTAL_MINES;
+            playField.spriteSheet = gSpriteSheetTexture;//t;
+            playField.setPos(0,66);
+            gameOver = false;
+            //tileset = t;
 
-        //Initialize hidden playing field
-        fieldHidden = new int *[col];
-        for (int i = 0; i < col; i++)
-            fieldHidden[i] = new int[row];
 
-        for (int i = 0; i < col; i++) {
-            for (int j = 0; j < row; j++)
-                fieldHidden[i][j] = EMPTY;
-        }
 
-        //Hide mines at random locations
-        int n = 0;
-        while (n < mines) {
-            int i = rand() % col;
-            int j = rand() % row;
-            if (fieldHidden[i][j] != MINE) {
-                fieldHidden[i][j] = MINE;
-                n++;
+            //Initialize unexplored tile counter and event flags
+            unexploredTiles = row * col;
+            sweepEnable = false;
+            flagEnable = false;
+            inPlay = false;
+
+
+            //Initialize visible playing field
+            fieldVisible = new int *[col];
+            for (int i = 0; i < col; i++)
+                fieldVisible[i] = new int[row];
+
+            for (int i = 0; i < col; i++) {
+                for (int j = 0; j < row; j++)
+                    fieldVisible[i][j] = UNKNOWN;
             }
-        }
 
-        //Generate clues
-        for (int i = 0; i < col; i++){
-            for (int j = 0; j < row; j++){
-                if (fieldHidden[i][j] != MINE)
-                    fieldHidden[i][j] = setClue(i,j);
+            //Initialize hidden playing field
+            fieldHidden = new int *[col];
+            for (int i = 0; i < col; i++)
+                fieldHidden[i] = new int[row];
+
+            for (int i = 0; i < col; i++) {
+                for (int j = 0; j < row; j++)
+                    fieldHidden[i][j] = EMPTY;
             }
-        }
 
-        //Initialize and display graphical interface
-        update();
+            //Hide mines at random locations
+            int n = 0;
+            while (n < mines) {
+                int i = rand() % col;
+                int j = rand() % row;
+                if (fieldHidden[i][j] != MINE) {
+                    fieldHidden[i][j] = MINE;
+                    n++;
+                }
+            }
+
+            //Generate clues
+            for (int i = 0; i < col; i++){
+                for (int j = 0; j < row; j++){
+                    if (fieldHidden[i][j] != MINE)
+                        fieldHidden[i][j] = setClue(i,j);
+                }
+            }
+
+            //Initialize and display graphical interface
+            update();
+        }
 
     }
 
     ///Deconstructor
     ~Minesweeper(){
-        printf("Minesweeper Object Deconstructing...");
+        printf("Minesweeper Object Deconstructing...\n");
 
         for(int i = 0; i < col; ++i) {
             delete [] fieldVisible[i];
@@ -104,6 +118,37 @@ class Minesweeper
             delete [] fieldHidden[i];
         }
         delete [] fieldHidden;
+
+        //Free loaded image
+        gSpriteSheetTexture.free();
+
+    }
+
+    bool loadMedia()
+    {
+        //Loading success flag
+        bool success = true;
+
+        //Load sprite sheet texture
+        if( !gSpriteSheetTexture.loadFromFile( "assets/minesweeper_tiles_3.png") )
+        {
+            printf( "Failed to load sprite sheet texture!\n" );
+            success = false;
+        }
+        else
+        {
+            int n = 0;
+            for (int i = 0; i < SS_COLUMNS; i++){
+                for (int j = 0; j < SS_ROWS; j++){
+                    gSpriteClips[ n ].x = SPRITE_WIDTH * i;
+                    gSpriteClips[ n ].y = SPRITE_HEIGHT * j;
+                    gSpriteClips[ n ].w = SPRITE_WIDTH;
+                    gSpriteClips[ n ].h = SPRITE_HEIGHT;
+                    n++;
+                }
+            }
+        }
+        return success;
     }
 
     ///Revert all graphical modifications to the playfield
@@ -227,9 +272,29 @@ class Minesweeper
         }
     }
 
-        void render( SDL_Rect sprite[]){
-            playField.render(sprite);
+    void logic(){
+        if (sweepEnable){
+            if ( !sweepTile(playField.col, playField.row) ){
+                printf("YOU LOSE...\n");
+                gameOver = true;
+            }
+            else{
+                if ( unexploredTiles == mines){
+                    printf("YOU WIN!!!\n");
+                    gameOver = true;
+                }
+            }
+            sweepEnable = false;
         }
+        if (flagEnable){
+            mineFlagToggle(playField.col, playField.row);
+            flagEnable = false;
+        }
+    }
+
+    void render(){
+        playField.render(gSpriteClips);
+    }
 
 };
 

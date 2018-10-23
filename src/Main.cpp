@@ -1,7 +1,7 @@
 //Using SDL, SDL_image, standard IO, and strings
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <string>
 #include <ctime>
@@ -10,6 +10,99 @@
 #include "Grid.h"
 #include "Minesweeper.h"
 #include "LTexture.h"
+
+/*GameState Stuff*/
+//Game state base class
+/*
+class GameState
+{
+    public:
+    virtual void handle_events() = 0;
+    virtual void logic() = 0;
+    virtual void render() = 0;
+    virtual ~GameState(){};
+};
+
+//State status manager
+void set_next_state( int newState );
+
+//State changer
+void change_state();
+
+//State variables
+int stateID = STATE_NULL;
+int nextState = STATE_NULL;
+
+//Game state object
+GameState *currentState = NULL;
+
+class Minesweeper : public GameState
+{
+    private:
+    //Level dimensions
+    const static int LEVEL_WIDTH = 1280;
+    const static int LEVEL_HEIGHT = 960;
+
+    //Overworld background
+    SDL_Surface *background;
+
+    //The houses
+    House redHouse;
+    House blueHouse;
+
+    public:
+    //Loads resources and initializes objects
+    OverWorld( int prevState );
+
+    //Frees resources
+    ~OverWorld();
+
+    //Main loop functions
+    void handle_events();
+    void logic();
+    void render();
+};
+
+void change_state()
+{
+    //If the state needs to be changed
+    if( nextState != STATE_NULL )
+    {
+        //Delete the current state
+        if( nextState != STATE_EXIT )
+        {
+            delete currentState;
+        }
+
+        //Change the state
+        switch( nextState )
+        {
+            case STATE_TITLE:
+                currentState = new Title();
+                break;
+
+            case STATE_GREEN_OVERWORLD:
+                currentState = new OverWorld( stateID );
+                break;
+
+            case STATE_RED_ROOM:
+                currentState = new RedRoom();
+                break;
+
+            case STATE_BLUE_ROOM:
+                currentState = new BlueRoom();
+                break;
+        }
+
+        //Change the current state ID
+        stateID = nextState;
+
+        //NULL the next state ID
+        nextState = STATE_NULL;
+    }
+}
+*/
+/*End GameState Stuff*/
 
 //Starts up SDL and creates window
 bool init();
@@ -22,15 +115,6 @@ extern SDL_Window* gWindow = NULL;
 
 //Globally used font
 extern TTF_Font *gFont = NULL;
-
-//The window renderer
-extern SDL_Renderer* gRenderer = NULL;
-
-//Test Sprite Sheet
-LTexture gSpriteSheetTexture;
-
-//Test Sprite Clips
-SDL_Rect gSpriteClips[ SPRITE_NUM ];
 
 
 bool init()
@@ -96,47 +180,8 @@ bool init()
 	return success;
 }
 
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-
-	//Load board texture
-	/*
-	if( !gBoardTexture.loadFromFile( "assets/Connect4Board.png" ) )
-	{
-		printf( "Failed to load sprite sheet texture!\n" );
-		success = false;
-	}
-	*/
-
-	//Load sprite sheet texture
-	if( !gSpriteSheetTexture.loadFromFile( gRenderer, "assets/minesweeper_tiles_3.png") )
-	{
-		printf( "Failed to load sprite sheet texture!\n" );
-		success = false;
-	}
-	else
-	{
-	    int n = 0;
-	    for (int i = 0; i < SS_COLUMNS; i++){
-            for (int j = 0; j < SS_ROWS; j++){
-                gSpriteClips[ n ].x = SPRITE_WIDTH * i;
-                gSpriteClips[ n ].y = SPRITE_HEIGHT * j;
-                gSpriteClips[ n ].w = SPRITE_WIDTH;
-                gSpriteClips[ n ].h = SPRITE_HEIGHT;
-                n++;
-            }
-	    }
-	}
-	return success;
-}
-
 void close()
 {
-
-    //Free loaded image
-	gSpriteSheetTexture.free();
 
     //Free global font
     TTF_CloseFont( gFont );
@@ -163,74 +208,46 @@ int main( int argc, char* args[] )
 	}
 	else
 	{
-		//Load media
-		if( !loadMedia() )
-		{
-			printf( "Failed to load media!\n" );
-		}
-		else
-		{
-            //Initialize Minesweeper Field
-            Minesweeper mineField = Minesweeper(gSpriteSheetTexture);
+        //Initialize Minesweeper Field
+        Minesweeper mineField = Minesweeper();
 
-			//Main loop flag
-			bool quit = false;
+		//Main loop flag
+		bool quit = false;
 
-			//Gameplay Enable flag
-			bool gameOver = false;
+		//Event handler
+		SDL_Event e;
 
-			//Event handler
-			SDL_Event e;
-
-			//While application is running
+		//While application is running
 /**-----[GAME LOOP START!]-----**/
-			while( !quit )
-			{
+		while( !quit )
+		{
 /**-----[INPUT EVENTS]-----**/
-                //Handle events on queue
-                while( SDL_PollEvent( &e ) != 0 )
+            //Handle events on queue
+            while( SDL_PollEvent( &e ) != 0 )
+            {
+                //User requests quit
+                if( e.type == SDL_QUIT )
                 {
-                    //User requests quit
-                    if( e.type == SDL_QUIT )
-                    {
-                        quit = true;
-                    }
-                    if ( !gameOver){
-                        //testGrid.handleEvent( &e );
-                        mineField.handleEvent( &e );
-                    }
-
+                    quit = true;
                 }
-/**-----[LOGIC HANDLING]-----**/
-                if (mineField.sweepEnable){
-                    if ( !mineField.sweepTile(mineField.playField.col, mineField.playField.row) ){
-                        printf("YOU LOSE...\n");
-                        gameOver = true;
-                    }
-                    else{
-                        if ( mineField.unexploredTiles == mineField.mines){
-                            printf("YOU WIN!!!\n");
-                            gameOver = true;
-                        }
-                    }
-                    mineField.sweepEnable = false;
+                if ( !mineField.gameOver){
+                    mineField.handleEvent( &e );
                 }
-                if (mineField.flagEnable){
-                    mineField.mineFlagToggle(mineField.playField.col, mineField.playField.row);
-                    mineField.flagEnable = false;
-                }
-/**-----[RENDERING]-----**/
-                //Clear screen
-                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-                SDL_RenderClear( gRenderer );
 
-                //Render Grid
-                mineField.render( gSpriteClips );
-
-                //Update screen
-                SDL_RenderPresent( gRenderer );
             }
-		}
+/**-----[LOGIC HANDLING]-----**/
+            mineField.logic();
+/**-----[RENDERING]-----**/
+            //Clear screen
+            SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+            SDL_RenderClear( gRenderer );
+
+            //Render Grid
+            mineField.render();
+
+            //Update screen
+            SDL_RenderPresent( gRenderer );
+        }
 	}
 
 	//Free resources and close SDL
