@@ -57,7 +57,7 @@ class LTexture
         }
 
         //Creates image from font string
-        bool loadFromRenderedText( std::string textureText, SDL_Color textColor, TTF_Font* gFont){
+        bool loadFromRenderedText( std::string textureText, SDL_Color textColor){
             free();     //Get rid of preexisting texture
             SDL_Surface* textSurface = TTF_RenderText_Solid( gFont, textureText.c_str()
                 , textColor );      //Render text surface

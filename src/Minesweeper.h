@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include "Const.h"
 #include "Grid.h"
+#include "GameState.h"
+#include "Button.h"
 
-class Minesweeper
+class Minesweeper : public GameState
 {
     public:
 
@@ -15,6 +17,7 @@ class Minesweeper
 
     int mines;
     int unexploredTiles;
+    int menu_bar_width;
 
     int **fieldVisible;
     int **fieldHidden;
@@ -25,12 +28,19 @@ class Minesweeper
     bool inPlay;
     bool gameOver;
 
+    LButton resetButton;
+    LButton newButton;
+
     //LTexture tileset;
     LTexture gSpriteSheetTexture;
+    LTexture ResetSpriteSheet;
+    LTexture NewSpriteSheet;
     Grid playField;
 
     //Test Sprite Clips
     SDL_Rect gSpriteClips[ SPRITE_NUM ];
+    SDL_Rect ResetSpriteClips[ BUTTON_SPRITE_NUM ];
+    SDL_Rect NewSpriteClips[ BUTTON_SPRITE_NUM ];
 
     ///Constructor Function
     Minesweeper(){
@@ -46,60 +56,29 @@ class Minesweeper
             col = GRID_WIDTH;
             row = GRID_HEIGHT;
             mines = TOTAL_MINES;
-            playField.spriteSheet = gSpriteSheetTexture;//t;
-            playField.setPos(0,66);
-            gameOver = false;
-            //tileset = t;
 
+            playField.setPos(0,MENU_BAR_HEIGHT);
 
+            menu_bar_width = GRID_WIDTH * TILE_WIDTH;
 
-            //Initialize unexplored tile counter and event flags
-            unexploredTiles = row * col;
-            sweepEnable = false;
-            flagEnable = false;
-            inPlay = false;
-
+            resetButton = LButton(menu_bar_width/2 + TILE_WIDTH, MENU_BAR_HEIGHT/4, TILE_WIDTH, TILE_HEIGHT);
+            newButton = LButton(menu_bar_width/2 - (TILE_WIDTH*2), MENU_BAR_HEIGHT/4, TILE_WIDTH, TILE_HEIGHT);
+            
 
             //Initialize visible playing field
             fieldVisible = new int *[col];
             for (int i = 0; i < col; i++)
                 fieldVisible[i] = new int[row];
 
-            for (int i = 0; i < col; i++) {
-                for (int j = 0; j < row; j++)
-                    fieldVisible[i][j] = UNKNOWN;
-            }
-
             //Initialize hidden playing field
             fieldHidden = new int *[col];
             for (int i = 0; i < col; i++)
                 fieldHidden[i] = new int[row];
 
-            for (int i = 0; i < col; i++) {
-                for (int j = 0; j < row; j++)
-                    fieldHidden[i][j] = EMPTY;
-            }
-
-            //Hide mines at random locations
-            int n = 0;
-            while (n < mines) {
-                int i = rand() % col;
-                int j = rand() % row;
-                if (fieldHidden[i][j] != MINE) {
-                    fieldHidden[i][j] = MINE;
-                    n++;
-                }
-            }
-
-            //Generate clues
-            for (int i = 0; i < col; i++){
-                for (int j = 0; j < row; j++){
-                    if (fieldHidden[i][j] != MINE)
-                        fieldHidden[i][j] = setClue(i,j);
-                }
-            }
+            newGame();
 
             //Initialize and display graphical interface
+            SDL_SetWindowSize(gWindow,(GRID_WIDTH * TILE_WIDTH),(GRID_HEIGHT * TILE_HEIGHT) + (TILE_HEIGHT * 2) );
             update();
         }
 
@@ -121,16 +100,61 @@ class Minesweeper
 
         //Free loaded image
         gSpriteSheetTexture.free();
+        ResetSpriteSheet.free();
+        NewSpriteSheet.free();
 
     }
 
+    void newGame()
+    {
+        //Hide all visible tiles
+        for (int i = 0; i < col; i++) {
+            for (int j = 0; j < row; j++)
+                fieldVisible[i][j] = UNKNOWN;
+        }
+
+        //Clear playfield
+        for (int i = 0; i < col; i++) {
+            for (int j = 0; j < row; j++)
+                fieldHidden[i][j] = EMPTY;
+        }
+
+        //Hide mines at random locations
+        int n = 0;
+        while (n < mines) {
+            int i = rand() % col;
+            int j = rand() % row;
+            if (fieldHidden[i][j] != MINE) {
+                fieldHidden[i][j] = MINE;
+                n++;
+            }
+        }
+
+        //Generate clues
+        for (int i = 0; i < col; i++){
+            for (int j = 0; j < row; j++){
+                if (fieldHidden[i][j] != MINE)
+                    fieldHidden[i][j] = setClue(i,j);
+            }
+        }
+
+        //Initialize unexplored tile counter and event flags
+        unexploredTiles = row * col;
+        sweepEnable = false;
+        flagEnable = false;
+        inPlay = false;
+        gameOver = false;
+
+    }
+
+    //TODO: Can we streamline the sprite sheet creationg into a function?
     bool loadMedia()
     {
         //Loading success flag
         bool success = true;
 
         //Load sprite sheet texture
-        if( !gSpriteSheetTexture.loadFromFile( "assets/minesweeper_tiles_3.png") )
+        if( !gSpriteSheetTexture.loadFromFile( "assets/minesweeper_tiles_32.png") )
         {
             printf( "Failed to load sprite sheet texture!\n" );
             success = false;
@@ -144,6 +168,46 @@ class Minesweeper
                     gSpriteClips[ n ].y = SPRITE_HEIGHT * j;
                     gSpriteClips[ n ].w = SPRITE_WIDTH;
                     gSpriteClips[ n ].h = SPRITE_HEIGHT;
+                    n++;
+                }
+            }
+        }
+
+        //Load sprite sheet texture
+        if( !ResetSpriteSheet.loadFromFile( "assets/reset_SS.png") )
+        {
+            printf( "Failed to load sprite sheet texture!\n" );
+            success = false;
+        }
+        else
+        {
+            int n = 0;
+            for (int i = 0; i < BUTTON_SS_COLUMNS; i++){
+                for (int j = 0; j < BUTTON_SS_ROWS; j++){
+                    ResetSpriteClips[ n ].x = SPRITE_WIDTH * i;
+                    ResetSpriteClips[ n ].y = SPRITE_HEIGHT * j;
+                    ResetSpriteClips[ n ].w = SPRITE_WIDTH;
+                    ResetSpriteClips[ n ].h = SPRITE_HEIGHT;
+                    n++;
+                }
+            }
+        }
+
+        //Load sprite sheet texture
+        if( !NewSpriteSheet.loadFromFile( "assets/new_SS.png") )
+        {
+            printf( "Failed to load sprite sheet texture!\n" );
+            success = false;
+        }
+        else
+        {
+            int n = 0;
+            for (int i = 0; i < BUTTON_SS_COLUMNS; i++){
+                for (int j = 0; j < BUTTON_SS_ROWS; j++){
+                    NewSpriteClips[ n ].x = SPRITE_WIDTH * i;
+                    NewSpriteClips[ n ].y = SPRITE_HEIGHT * j;
+                    NewSpriteClips[ n ].w = SPRITE_WIDTH;
+                    NewSpriteClips[ n ].h = SPRITE_HEIGHT;
                     n++;
                 }
             }
@@ -253,6 +317,23 @@ class Minesweeper
         //Handle grid events first
         playField.handleEvent(e);
 
+        //Handle button events first
+        resetButton.handleEvent(e);
+        newButton.handleEvent(e);
+
+
+
+        if (resetButton.isClicked){
+            printf("RESET\n");
+            newGame();
+        }
+
+        if (newButton.isClicked){
+            //Something about state change flags here
+            printf("CHANGE STATE\n");
+            set_next_state(STATE_MENU);
+        }
+
         //Refresh playing grid
         update();
 
@@ -273,6 +354,10 @@ class Minesweeper
     }
 
     void logic(){
+
+        resetButton.logic();
+        newButton.logic();
+
         if (sweepEnable){
             if ( !sweepTile(playField.col, playField.row) ){
                 printf("YOU LOSE...\n");
@@ -293,7 +378,9 @@ class Minesweeper
     }
 
     void render(){
-        playField.render(gSpriteClips);
+        playField.render(gSpriteClips, &gSpriteSheetTexture);
+        resetButton.render(ResetSpriteClips, &ResetSpriteSheet);
+        newButton.render(ResetSpriteClips, &NewSpriteSheet);
     }
 
 };

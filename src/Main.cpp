@@ -10,58 +10,21 @@
 #include "Grid.h"
 #include "Minesweeper.h"
 #include "LTexture.h"
+#include "GameState.h"
+#include "Menu.h"
 
-/*GameState Stuff*/
-//Game state base class
-/*
-class GameState
-{
-    public:
-    virtual void handle_events() = 0;
-    virtual void logic() = 0;
-    virtual void render() = 0;
-    virtual ~GameState(){};
-};
+//Starts up SDL and creates window
+bool init();
 
-//State status manager
-void set_next_state( int newState );
+//Frees media and shuts down SDL
+void close();
 
-//State changer
-void change_state();
+//Globally used font
+//extern TTF_Font *gFont = NULL;
 
-//State variables
-int stateID = STATE_NULL;
-int nextState = STATE_NULL;
-
-//Game state object
 GameState *currentState = NULL;
 
-class Minesweeper : public GameState
-{
-    private:
-    //Level dimensions
-    const static int LEVEL_WIDTH = 1280;
-    const static int LEVEL_HEIGHT = 960;
-
-    //Overworld background
-    SDL_Surface *background;
-
-    //The houses
-    House redHouse;
-    House blueHouse;
-
-    public:
-    //Loads resources and initializes objects
-    OverWorld( int prevState );
-
-    //Frees resources
-    ~OverWorld();
-
-    //Main loop functions
-    void handle_events();
-    void logic();
-    void render();
-};
+/*GameState Stuff*/
 
 void change_state()
 {
@@ -77,20 +40,12 @@ void change_state()
         //Change the state
         switch( nextState )
         {
-            case STATE_TITLE:
-                currentState = new Title();
+            case STATE_MENU:
+                currentState = new Menu();
                 break;
 
-            case STATE_GREEN_OVERWORLD:
-                currentState = new OverWorld( stateID );
-                break;
-
-            case STATE_RED_ROOM:
-                currentState = new RedRoom();
-                break;
-
-            case STATE_BLUE_ROOM:
-                currentState = new BlueRoom();
+            case STATE_GAME:
+                currentState = new Minesweeper(/*insert size and mines here?*/);
                 break;
         }
 
@@ -101,21 +56,7 @@ void change_state()
         nextState = STATE_NULL;
     }
 }
-*/
 /*End GameState Stuff*/
-
-//Starts up SDL and creates window
-bool init();
-
-//Frees media and shuts down SDL
-void close();
-
-//The window we'll be rendering to
-extern SDL_Window* gWindow = NULL;
-
-//Globally used font
-extern TTF_Font *gFont = NULL;
-
 
 bool init()
 {
@@ -208,8 +149,11 @@ int main( int argc, char* args[] )
 	}
 	else
 	{
+    	//Set the current state ID
+    	stateID = STATE_MENU;
+
         //Initialize Minesweeper Field
-        Minesweeper mineField = Minesweeper();
+        currentState = new Menu();
 
 		//Main loop flag
 		bool quit = false;
@@ -230,20 +174,24 @@ int main( int argc, char* args[] )
                 {
                     quit = true;
                 }
-                if ( !mineField.gameOver){
-                    mineField.handleEvent( &e );
+                if ( !currentState->gameOver){
+                    currentState->handleEvent( &e );
                 }
 
             }
 /**-----[LOGIC HANDLING]-----**/
-            mineField.logic();
+            currentState->logic();
+        	
+        	//Change state if needed
+        	change_state();
+        	
 /**-----[RENDERING]-----**/
             //Clear screen
             SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
             SDL_RenderClear( gRenderer );
 
             //Render Grid
-            mineField.render();
+            currentState->render();
 
             //Update screen
             SDL_RenderPresent( gRenderer );

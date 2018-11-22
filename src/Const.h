@@ -4,24 +4,44 @@
 //The window renderer
 extern SDL_Renderer* gRenderer = NULL;
 
+//The window we'll be rendering to
+extern SDL_Window* gWindow = NULL;
+
+//Globally used font
+extern TTF_Font *gFont = NULL;
+
 //Screen dimension constants
 const int SCREEN_WIDTH = 990;
 const int SCREEN_HEIGHT = 660;
 
-const int TILE_WIDTH = 33;
-const int TILE_HEIGHT = 33;
+//const int BUTTON_WIDTH = 300;
+//const int BUTTON_HEIGHT = 300;
+
+
+
+const int TILE_WIDTH = 32;
+const int TILE_HEIGHT = 32;
+
+const int MENU_BAR_HEIGHT = TILE_HEIGHT * 2;
 
 const int GRID_HEIGHT = 10;//16;
-const int GRID_WIDTH = 10;//30;
+const int GRID_WIDTH = 20;//30;
 
 const int SPRITE_NUM = 14;
 const int SS_ROWS = 7;
 const int SS_COLUMNS = 2;
 
-const int SPRITE_HEIGHT = 33;
-const int SPRITE_WIDTH = 33;
+const int SPRITE_HEIGHT = 32;
+const int SPRITE_WIDTH = 32;
 
-const int TOTAL_MINES = 10;//99;
+const int BUTTON_SPRITE_NUM = 4;
+const int BUTTON_SS_ROWS = 2;
+const int BUTTON_SS_COLUMNS = 2;
+
+const int BUTTON_HEIGHT = 100;
+const int BUTTON_WIDTH = 100;
+
+const int TOTAL_MINES = 40;//99;
 
 enum{EMPTY,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,MINE,UNKNOWN,PRESS,FLAG,MISPLACED};
 
@@ -53,12 +73,12 @@ DirectionVector DIRECTIONS[] = {
 };
 
 //Game states
-/*enum GameStates
+enum GameStates
 {
     STATE_NULL,
     STATE_MENU,
     STATE_GAME,
-};*/
-
+    STATE_EXIT
+};
 
 #endif // CONST_H_INCLUDED

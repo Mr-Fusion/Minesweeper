@@ -24,7 +24,7 @@ class Grid
         //Grid array
         int **tiles;
 
-        LTexture spriteSheet;
+        //LTexture spriteSheet;
 
         ///Constructor Function
         Grid(){
@@ -119,11 +119,11 @@ class Grid
 		}
 
 		///Render the state of the playing grid
-        void render( SDL_Rect sprite[]){
+        void render( SDL_Rect sprite[],LTexture *spriteSheet){
             for (int i = 0; i < cMax; i++)
             {
                 for (int j = 0; j < rMax; j++)
-                    spriteSheet.render( i * cWidth + xLoc, j * rHeight + yLoc, &sprite[tiles[i][j]]);
+                    spriteSheet->render( i * cWidth + xLoc, j * rHeight + yLoc, &sprite[tiles[i][j]]);
             }
         }
 
