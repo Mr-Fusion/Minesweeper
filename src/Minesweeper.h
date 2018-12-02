@@ -35,7 +35,7 @@ class Minesweeper : public GameState
     LTexture gSpriteSheetTexture;
     LTexture ResetSpriteSheet;
     LTexture NewSpriteSheet;
-    Grid playField;
+    Grid *playField;
 
     //Test Sprite Clips
     SDL_Rect gSpriteClips[ SPRITE_NUM ];
@@ -43,7 +43,7 @@ class Minesweeper : public GameState
     SDL_Rect NewSpriteClips[ BUTTON_SPRITE_NUM ];
 
     ///Constructor Function
-    Minesweeper(){
+    Minesweeper(int w, int h, int m){
 
         //Load media
         if( !loadMedia() )
@@ -53,13 +53,14 @@ class Minesweeper : public GameState
         else
         {
             //Initialize playing field dimensions, difficulty, and appearance
-            col = GRID_WIDTH;
-            row = GRID_HEIGHT;
-            mines = TOTAL_MINES;
+            col = w;//GRID_WIDTH;
+            row = h;//GRID_HEIGHT;
+            mines = m;//TOTAL_MINES;
 
-            playField.setPos(0,MENU_BAR_HEIGHT);
+            playField = new Grid(0, MENU_BAR_HEIGHT, col, row);
+            //playField.setPos(0,MENU_BAR_HEIGHT);
 
-            menu_bar_width = GRID_WIDTH * TILE_WIDTH;
+            menu_bar_width = col * TILE_WIDTH;
 
             resetButton = LButton(menu_bar_width/2 + TILE_WIDTH, MENU_BAR_HEIGHT/4, TILE_WIDTH, TILE_HEIGHT);
             newButton = LButton(menu_bar_width/2 - (TILE_WIDTH*2), MENU_BAR_HEIGHT/4, TILE_WIDTH, TILE_HEIGHT);
@@ -78,7 +79,7 @@ class Minesweeper : public GameState
             newGame();
 
             //Initialize and display graphical interface
-            SDL_SetWindowSize(gWindow,(GRID_WIDTH * TILE_WIDTH),(GRID_HEIGHT * TILE_HEIGHT) + (TILE_HEIGHT * 2) );
+            SDL_SetWindowSize(gWindow,(col * TILE_WIDTH),(row * TILE_HEIGHT) + (TILE_HEIGHT * 2) );
             update();
         }
 
@@ -97,6 +98,8 @@ class Minesweeper : public GameState
             delete [] fieldHidden[i];
         }
         delete [] fieldHidden;
+
+        delete playField;
 
         //Free loaded image
         gSpriteSheetTexture.free();
@@ -219,7 +222,7 @@ class Minesweeper : public GameState
     void update(void){
         for (int i = 0; i < col; i++){
             for (int j = 0; j < row; j++){
-                playField.tiles[i][j] = fieldVisible[i][j];
+                playField->tiles[i][j] = fieldVisible[i][j];
             }
         }
     }
@@ -253,7 +256,7 @@ class Minesweeper : public GameState
         int yTemp = 0;
         DirectionVector dir;
 
-        if ( !(fieldVisible[x][y] == FLAG) ){
+        if ( fieldVisible[x][y] == UNKNOWN ){
             fieldVisible[x][y] = fieldHidden[x][y];
             unexploredTiles--;
             if ( fieldVisible[x][y] == EMPTY){
@@ -299,6 +302,18 @@ class Minesweeper : public GameState
         update();
     }
 
+    ///Routine for winning the game
+    ///Places flahs on all known mines
+    void victory(void){
+        for (int i = 0; i < col; i++){
+            for (int j = 0; j < row; j++){
+                if ((fieldHidden[i][j] == MINE) && (fieldVisible[i][j] == UNKNOWN) )
+                    fieldVisible[i][j] = FLAG;
+            }
+        }
+        update();
+    }
+
     ///Handles mouse event
     void handleEvent( SDL_Event* e){
         int x, y;
@@ -306,7 +321,7 @@ class Minesweeper : public GameState
         //Get mouse position
         if( e->type == SDL_MOUSEMOTION ){
             SDL_GetMouseState( &x, &y );
-            if (playField.isInside(x,y) == false){
+            if (playField->isInside(x,y) == false){
                 inPlay = false;
             }
             else {
@@ -315,7 +330,7 @@ class Minesweeper : public GameState
         }
 
         //Handle grid events first
-        playField.handleEvent(e);
+        playField->handleEvent(e);
 
         //Handle button events first
         resetButton.handleEvent(e);
@@ -339,7 +354,7 @@ class Minesweeper : public GameState
 
 
 
-        if (inPlay){
+        if (inPlay && !gameOver){
             if( e->button.button == SDL_BUTTON_LEFT && e->type == SDL_MOUSEBUTTONUP ){
                 sweepEnable = true;
             }
@@ -347,8 +362,8 @@ class Minesweeper : public GameState
                 flagEnable = true;
             }
             if( e->motion.state || e->button.state == SDL_PRESSED ){
-                if (playField.tiles[playField.col][playField.row] == UNKNOWN)
-                    playField.tiles[playField.col][playField.row] = PRESS;
+                if (playField->tiles[playField->col][playField->row] == UNKNOWN)
+                    playField->tiles[playField->col][playField->row] = PRESS;
             }
         }
     }
@@ -359,26 +374,27 @@ class Minesweeper : public GameState
         newButton.logic();
 
         if (sweepEnable){
-            if ( !sweepTile(playField.col, playField.row) ){
+            if ( !sweepTile(playField->col, playField->row) ){
                 printf("YOU LOSE...\n");
                 gameOver = true;
             }
             else{
                 if ( unexploredTiles == mines){
                     printf("YOU WIN!!!\n");
+                    victory();
                     gameOver = true;
                 }
             }
             sweepEnable = false;
         }
         if (flagEnable){
-            mineFlagToggle(playField.col, playField.row);
+            mineFlagToggle(playField->col, playField->row);
             flagEnable = false;
         }
     }
 
     void render(){
-        playField.render(gSpriteClips, &gSpriteSheetTexture);
+        playField->render(gSpriteClips, &gSpriteSheetTexture);
         resetButton.render(ResetSpriteClips, &ResetSpriteSheet);
         newButton.render(ResetSpriteClips, &NewSpriteSheet);
     }

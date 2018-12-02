@@ -44,8 +44,16 @@ void change_state()
                 currentState = new Menu();
                 break;
 
-            case STATE_GAME:
-                currentState = new Minesweeper(/*insert size and mines here?*/);
+            case STATE_GAME_EASY:
+                currentState = new Minesweeper(GRID_WIDTH_EASY, GRID_HEIGHT_EASY, MINE_NUM_EASY);
+                break;
+
+            case STATE_GAME_MED:
+                currentState = new Minesweeper(GRID_WIDTH_MED, GRID_HEIGHT_MED, MINE_NUM_MED);
+                break;
+
+            case STATE_GAME_HARD:
+                currentState = new Minesweeper(GRID_WIDTH_HARD, GRID_HEIGHT_HARD, MINE_NUM_HARD);
                 break;
         }
 
@@ -123,6 +131,7 @@ bool init()
 
 void close()
 {
+	delete currentState;
 
     //Free global font
     TTF_CloseFont( gFont );

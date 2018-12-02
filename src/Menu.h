@@ -9,12 +9,18 @@ class Menu : public GameState
 {
     public:
 
-    LButton testButton;
+    
+    LButton eButton;    
+    LButton mButton;
+    LButton hButton;
+
 
     //LTexture tileset;
     LTexture ButtonSpriteSheet;
 
-    LTexture testText;
+    LTexture eText;
+    LTexture mText;
+    LTexture hText;
 
     //Test Sprite Clips
     SDL_Rect ButtonSpriteClips[ BUTTON_SPRITE_NUM ];
@@ -30,7 +36,9 @@ class Menu : public GameState
         else
         {
         	//Initialize Menu here
-        	testButton = LButton(300, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
+            eButton = LButton(300, 100, BUTTON_WIDTH, BUTTON_HEIGHT);
+        	mButton = LButton(300, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
+            hButton = LButton(300, 500, BUTTON_WIDTH, BUTTON_HEIGHT);
 
         	SDL_SetWindowSize(gWindow,SCREEN_WIDTH, SCREEN_HEIGHT);
         }
@@ -45,7 +53,9 @@ class Menu : public GameState
 
         //Free loaded image
         ButtonSpriteSheet.free();
-        testText.free();
+        eText.free();
+        mText.free();
+        hText.free();
 
     }
 
@@ -84,7 +94,17 @@ class Menu : public GameState
         {
             //Render text
             SDL_Color textColor = { 0, 0, 0 };
-            if( !testText.loadFromRenderedText( "Start Game!", textColor ) )
+            if( !eText.loadFromRenderedText( "Easy", textColor ) )
+            {
+                printf( "Failed to render text texture!\n" );
+                success = false;
+            }
+            if( !mText.loadFromRenderedText( "Medium", textColor ) )
+            {
+                printf( "Failed to render text texture!\n" );
+                success = false;
+            }
+            if( !hText.loadFromRenderedText( "Hard", textColor ) )
             {
                 printf( "Failed to render text texture!\n" );
                 success = false;
@@ -97,25 +117,43 @@ class Menu : public GameState
     void handleEvent( SDL_Event* e){
 
         //Handle button events first
-        testButton.handleEvent(e);
+        eButton.handleEvent(e);
+        mButton.handleEvent(e);
+        hButton.handleEvent(e);
 
 
 
-        if (testButton.isClicked){
+        if (eButton.isClicked){
             //Something about state change flags here
     		printf("CHANGE STATE\n");
-            set_next_state(STATE_GAME);
+            set_next_state(STATE_GAME_EASY);
+        }
+        if (mButton.isClicked){
+            //Something about state change flags here
+            printf("CHANGE STATE\n");
+            set_next_state(STATE_GAME_MED);
+        }
+        if (hButton.isClicked){
+            //Something about state change flags here
+            printf("CHANGE STATE\n");
+            set_next_state(STATE_GAME_HARD);
         }
     }
 
     void logic(){
     	//Handle actual state change here?
-    	testButton.logic();
+    	eButton.logic();
+        mButton.logic();
+        hButton.logic();
     }
 
     void render(){
-        testButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
-        testText.render(300 + BUTTON_WIDTH, 300 + BUTTON_HEIGHT/4);
+        eButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
+        mButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
+        hButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
+        eText.render(300 + BUTTON_WIDTH + 10, 100 + BUTTON_HEIGHT/4);
+        mText.render(300 + BUTTON_WIDTH + 10, 300 + BUTTON_HEIGHT/4);
+        hText.render(300 + BUTTON_WIDTH + 10, 500 + BUTTON_HEIGHT/4);
     }
 
 };

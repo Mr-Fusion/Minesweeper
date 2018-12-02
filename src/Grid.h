@@ -28,14 +28,36 @@ class Grid
 
         ///Constructor Function
         Grid(){
+            printf("Grid Object default constructor\n");
             //Initialize the size, location, dimensions and appearance of the grid
-            rMax = GRID_HEIGHT;
-            cMax = GRID_WIDTH;
+            rMax = GRID_HEIGHT_HARD;
+            cMax = GRID_WIDTH_HARD;     //Why doesn't the dynamic array destruct properly unless I parametrize it larger than I need to?
             setPos(0,0);
             setDim(TILE_WIDTH,TILE_HEIGHT);
             //spriteSheet = ss;
 
             //All grid tiles are set to 0 by default
+            tiles = new int *[cMax];
+            for (int i = 0; i < cMax; i++)
+                tiles[i] = new int[rMax];
+            for (int i = 0; i < cMax; i++) {
+                for (int j = 0; j < rMax; j++)
+                    tiles[i][j] = 0;
+            }
+
+            selectTile(0,0);
+        }
+        Grid(int x, int y, int w, int h){
+            printf("Grid Object overload constructor\n");
+            //Initialize the size, location, dimensions and appearance of the grid
+            rMax = h;//GRID_HEIGHT;
+            cMax = w;//GRID_WIDTH;
+            setPos(x,y);
+            setDim(TILE_WIDTH,TILE_HEIGHT);
+            //spriteSheet = ss;
+
+            //All grid tiles are set to 0 by default
+            printf("Creating dynamic array in overload\n");
             tiles = new int *[cMax];
             for (int i = 0; i < cMax; i++)
                 tiles[i] = new int[rMax];
@@ -53,8 +75,10 @@ class Grid
 
             for(int i = 0; i < cMax; ++i) {
                 delete [] tiles[i];
+                //printf("debug point 0.5\n");
             }
             delete [] tiles;
+            printf("debug point 1\n");
         }
 
 		///Set Grid Position
