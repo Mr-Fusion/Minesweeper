@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <stdlib.h>
+#include <sstream>
 #include "Const.h"
 #include "Grid.h"
 #include "GameState.h"
@@ -16,6 +17,7 @@ class Minesweeper : public GameState
     int col;
 
     int mines;
+    int flags;
     int unexploredTiles;
     int menu_bar_width;
 
@@ -28,6 +30,10 @@ class Minesweeper : public GameState
     bool inPlay;
     bool gameOver;
 
+    SDL_Color textColor;
+
+    Uint32 startTime;
+
     LButton resetButton;
     LButton newButton;
 
@@ -35,6 +41,13 @@ class Minesweeper : public GameState
     LTexture gSpriteSheetTexture;
     LTexture ResetSpriteSheet;
     LTexture NewSpriteSheet;
+
+    LTexture timeTextTexture;
+    std::stringstream timeText;
+
+    LTexture flagTextTexture;
+    std::stringstream flagText;
+
     Grid *playField;
 
     //Test Sprite Clips
@@ -56,6 +69,8 @@ class Minesweeper : public GameState
             col = w;//GRID_WIDTH;
             row = h;//GRID_HEIGHT;
             mines = m;//TOTAL_MINES;
+            startTime = 0;
+            textColor = { 255, 0, 0 };
 
             playField = new Grid(0, MENU_BAR_HEIGHT, col, row);
             //playField.setPos(0,MENU_BAR_HEIGHT);
@@ -105,6 +120,8 @@ class Minesweeper : public GameState
         gSpriteSheetTexture.free();
         ResetSpriteSheet.free();
         NewSpriteSheet.free();
+        timeTextTexture.free();
+        flagTextTexture.free();
 
     }
 
@@ -143,10 +160,22 @@ class Minesweeper : public GameState
 
         //Initialize unexplored tile counter and event flags
         unexploredTiles = row * col;
+        flags = mines;
         sweepEnable = false;
         flagEnable = false;
         inPlay = false;
         gameOver = false;
+        startTime = SDL_GetTicks();
+
+        //Set text to be rendered
+        flagText.str( "" );
+        flagText << flags;
+
+        //Render text
+        if( !flagTextTexture.loadFromRenderedText( flagText.str().c_str(), textColor ) )
+        {
+            printf( "Unable to render flag texture!\n" );
+        }
 
     }
 
@@ -281,10 +310,14 @@ class Minesweeper : public GameState
 
     ///Toggles flag marker (Unknown tiles only)
     void mineFlagToggle(int x, int y){
-        if (fieldVisible[x][y] == FLAG)
+        if (fieldVisible[x][y] == FLAG){
             fieldVisible[x][y] = UNKNOWN;
-        else if (fieldVisible[x][y] == UNKNOWN)
+            flags++;
+        }
+        else if (fieldVisible[x][y] == UNKNOWN){
             fieldVisible[x][y] = FLAG;
+            flags--;
+        }
         update();
     }
 
@@ -389,7 +422,30 @@ class Minesweeper : public GameState
         }
         if (flagEnable){
             mineFlagToggle(playField->col, playField->row);
+
+            //Set text to be rendered
+            flagText.str( "" );
+            flagText << flags;
+
+            //Render text
+            if( !flagTextTexture.loadFromRenderedText( flagText.str().c_str(), textColor ) )
+            {
+                printf( "Unable to render flag texture!\n" );
+            }
+
             flagEnable = false;
+        }
+
+        if (!gameOver){
+            //Set text to be rendered
+            timeText.str( "" );
+            timeText << (SDL_GetTicks() - startTime) / 1000;
+
+            //Render text
+            if( !timeTextTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
+            {
+                printf( "Unable to render time texture!\n" );
+            }
         }
     }
 
@@ -397,6 +453,8 @@ class Minesweeper : public GameState
         playField->render(gSpriteClips, &gSpriteSheetTexture);
         resetButton.render(ResetSpriteClips, &ResetSpriteSheet);
         newButton.render(ResetSpriteClips, &NewSpriteSheet);
+        timeTextTexture.render( 10, MENU_BAR_HEIGHT / 2 );
+        flagTextTexture.render( menu_bar_width - ( TILE_WIDTH * 2 ), MENU_BAR_HEIGHT / 2 );
     }
 
 };

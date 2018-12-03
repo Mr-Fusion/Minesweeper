@@ -84,7 +84,7 @@ class Menu : public GameState
             }
         }
         //Open the font
-        gFont = TTF_OpenFont( "assets/PressStart2P.ttf", 28 );
+        gFont = TTF_OpenFont( "assets/PressStart2P.ttf", 20 );
         if( gFont == NULL )
         {
             printf( "Failed to load Minesweeper font! SDL_ttf Error: %s\n", TTF_GetError() );
