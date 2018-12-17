@@ -30,8 +30,8 @@ const int GRID_WIDTH_EASY = 10;
 const int GRID_HEIGHT_MED = 10;
 const int GRID_WIDTH_MED = 20;
 
-const int GRID_HEIGHT_HARD = 20;
-const int GRID_WIDTH_HARD = 20;
+const int GRID_HEIGHT_HARD = 16;
+const int GRID_WIDTH_HARD = 30;
 
 const int SPRITE_NUM = 14;
 const int SS_ROWS = 7;
@@ -48,8 +48,8 @@ const int BUTTON_HEIGHT = 100;
 const int BUTTON_WIDTH = 100;
 
 const int MINE_NUM_EASY = 10;
-const int MINE_NUM_MED = 30;
-const int MINE_NUM_HARD = 60;
+const int MINE_NUM_MED = 40;
+const int MINE_NUM_HARD = 99;
 
 enum{EMPTY,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,MINE,UNKNOWN,PRESS,FLAG,MISPLACED};
 

@@ -41,6 +41,7 @@ class Minesweeper : public GameState
     LTexture gSpriteSheetTexture;
     LTexture ResetSpriteSheet;
     LTexture NewSpriteSheet;
+    LTexture SmileySpriteSheet;
 
     LTexture timeTextTexture;
     std::stringstream timeText;
@@ -54,6 +55,11 @@ class Minesweeper : public GameState
     SDL_Rect gSpriteClips[ SPRITE_NUM ];
     SDL_Rect ResetSpriteClips[ BUTTON_SPRITE_NUM ];
     SDL_Rect NewSpriteClips[ BUTTON_SPRITE_NUM ];
+    SDL_Rect SmileySpriteClips[ BUTTON_SPRITE_NUM ];
+
+    int smileyMood;
+
+    enum{SMILE,SAD,SURPRISE,WIN};
 
     ///Constructor Function
     Minesweeper(int w, int h, int m){
@@ -166,6 +172,7 @@ class Minesweeper : public GameState
         inPlay = false;
         gameOver = false;
         startTime = SDL_GetTicks();
+        smileyMood = SMILE;
 
         //Set text to be rendered
         flagText.str( "" );
@@ -240,6 +247,26 @@ class Minesweeper : public GameState
                     NewSpriteClips[ n ].y = SPRITE_HEIGHT * j;
                     NewSpriteClips[ n ].w = SPRITE_WIDTH;
                     NewSpriteClips[ n ].h = SPRITE_HEIGHT;
+                    n++;
+                }
+            }
+        }
+
+        //Load sprite sheet texture
+        if( !SmileySpriteSheet.loadFromFile( "assets/smiley_SS.png") )
+        {
+            printf( "Failed to load sprite sheet texture!\n" );
+            success = false;
+        }
+        else
+        {
+            int n = 0;
+            for (int i = 0; i < BUTTON_SS_COLUMNS; i++){
+                for (int j = 0; j < BUTTON_SS_ROWS; j++){
+                    SmileySpriteClips[ n ].x = SPRITE_WIDTH * i;
+                    SmileySpriteClips[ n ].y = SPRITE_HEIGHT * j;
+                    SmileySpriteClips[ n ].w = SPRITE_WIDTH;
+                    SmileySpriteClips[ n ].h = SPRITE_HEIGHT;
                     n++;
                 }
             }
@@ -385,18 +412,20 @@ class Minesweeper : public GameState
         //Refresh playing grid
         update();
 
-
-
-        if (inPlay && !gameOver){
-            if( e->button.button == SDL_BUTTON_LEFT && e->type == SDL_MOUSEBUTTONUP ){
-                sweepEnable = true;
-            }
-            if( e->button.button == SDL_BUTTON_RIGHT && e->type == SDL_MOUSEBUTTONUP ){
-                flagEnable = true;
-            }
-            if( e->motion.state || e->button.state == SDL_PRESSED ){
-                if (playField->tiles[playField->col][playField->row] == UNKNOWN)
-                    playField->tiles[playField->col][playField->row] = PRESS;
+        if (!gameOver){
+            smileyMood = SMILE;
+            if (inPlay){
+                if( e->button.button == SDL_BUTTON_LEFT && e->type == SDL_MOUSEBUTTONUP ){
+                    sweepEnable = true;
+                }
+                if( e->button.button == SDL_BUTTON_RIGHT && e->type == SDL_MOUSEBUTTONUP ){
+                    flagEnable = true;
+                }
+                if( e->motion.state || e->button.state == SDL_PRESSED ){
+                    smileyMood = SURPRISE;
+                    if (playField->tiles[playField->col][playField->row] == UNKNOWN)
+                        playField->tiles[playField->col][playField->row] = PRESS;
+                }
             }
         }
     }
@@ -407,12 +436,15 @@ class Minesweeper : public GameState
         newButton.logic();
 
         if (sweepEnable){
+            smileyMood = SMILE;
             if ( !sweepTile(playField->col, playField->row) ){
+                smileyMood = SAD;
                 printf("YOU LOSE...\n");
                 gameOver = true;
             }
             else{
                 if ( unexploredTiles == mines){
+                    smileyMood = WIN;
                     printf("YOU WIN!!!\n");
                     victory();
                     gameOver = true;
@@ -421,6 +453,7 @@ class Minesweeper : public GameState
             sweepEnable = false;
         }
         if (flagEnable){
+            smileyMood = SMILE;
             mineFlagToggle(playField->col, playField->row);
 
             //Set text to be rendered
@@ -453,8 +486,10 @@ class Minesweeper : public GameState
         playField->render(gSpriteClips, &gSpriteSheetTexture);
         resetButton.render(ResetSpriteClips, &ResetSpriteSheet);
         newButton.render(ResetSpriteClips, &NewSpriteSheet);
-        timeTextTexture.render( 10, MENU_BAR_HEIGHT / 2 );
-        flagTextTexture.render( menu_bar_width - ( TILE_WIDTH * 2 ), MENU_BAR_HEIGHT / 2 );
+        timeTextTexture.render( 5, MENU_BAR_HEIGHT / 2 );
+        flagTextTexture.render( menu_bar_width - ( flagTextTexture.getWidth()), MENU_BAR_HEIGHT / 2 );
+
+        SmileySpriteSheet.render( menu_bar_width/2 - SPRITE_WIDTH/2 , MENU_BAR_HEIGHT/4, &SmileySpriteClips[ smileyMood ] );
     }
 
 };
