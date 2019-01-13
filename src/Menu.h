@@ -18,9 +18,14 @@ class Menu : public GameState
     //LTexture tileset;
     LTexture ButtonSpriteSheet;
 
+    LTexture titleText;
+
     LTexture eText;
     LTexture mText;
     LTexture hText;
+
+    LTexture cautionBackdrop;
+    LTexture menuPlate;
 
     //Test Sprite Clips
     SDL_Rect ButtonSpriteClips[ BUTTON_SPRITE_NUM ];
@@ -36,9 +41,9 @@ class Menu : public GameState
         else
         {
         	//Initialize Menu here
-            eButton = LButton(300, 100, BUTTON_WIDTH, BUTTON_HEIGHT);
-        	mButton = LButton(300, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
-            hButton = LButton(300, 500, BUTTON_WIDTH, BUTTON_HEIGHT);
+            eButton = LButton(SCREEN_WIDTH/4 - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
+        	mButton = LButton(SCREEN_WIDTH/2 - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
+            hButton = LButton(SCREEN_WIDTH * 3 / 4  - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
 
         	SDL_SetWindowSize(gWindow,SCREEN_WIDTH, SCREEN_HEIGHT);
         }
@@ -53,9 +58,12 @@ class Menu : public GameState
 
         //Free loaded image
         ButtonSpriteSheet.free();
+        titleText.free();
         eText.free();
         mText.free();
         hText.free();
+        cautionBackdrop.free();
+        menuPlate.free();
 
     }
 
@@ -65,6 +73,18 @@ class Menu : public GameState
         bool success = true;
 
         //Load sprite sheet texture
+        if( !cautionBackdrop.loadFromFile( "assets/caution_background.png") )
+        {
+            printf( "Failed to load caution texture!\n" );
+            success = false;
+        }
+
+        if( !menuPlate.loadFromFile( "assets/menu_plate.png") )
+        {
+            printf( "Failed to load menu plate texture!\n" );
+            success = false;
+        }
+
         if( !ButtonSpriteSheet.loadFromFile( "assets/button_SS.png") )
         {
             printf( "Failed to load sprite sheet texture!\n" );
@@ -84,6 +104,23 @@ class Menu : public GameState
             }
         }
         //Open the font
+        gFont = TTF_OpenFont( "assets/PixelSplitter-Bold.ttf", 60 );
+        if( gFont == NULL )
+        {
+            printf( "Failed to load Minesweeper Title font! SDL_ttf Error: %s\n", TTF_GetError() );
+            success = false;
+        }
+        else
+        {
+            //Render text
+            SDL_Color textColor = { 0, 0, 0 };
+            if( !titleText.loadFromRenderedText( "Minesweeper", textColor ) )
+            {
+                printf( "Failed to render text texture!\n" );
+                success = false;
+            }
+        }
+
         gFont = TTF_OpenFont( "assets/PressStart2P.ttf", 20 );
         if( gFont == NULL )
         {
@@ -99,7 +136,7 @@ class Menu : public GameState
                 printf( "Failed to render text texture!\n" );
                 success = false;
             }
-            if( !mText.loadFromRenderedText( "Medium", textColor ) )
+            if( !mText.loadFromRenderedText( "Med", textColor ) )
             {
                 printf( "Failed to render text texture!\n" );
                 success = false;
@@ -148,12 +185,15 @@ class Menu : public GameState
     }
 
     void render(){
+    	cautionBackdrop.render(0,0);
+    	menuPlate.render(32,32);
         eButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
         mButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
         hButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
-        eText.render(300 + BUTTON_WIDTH + 10, 100 + BUTTON_HEIGHT/4);
-        mText.render(300 + BUTTON_WIDTH + 10, 300 + BUTTON_HEIGHT/4);
-        hText.render(300 + BUTTON_WIDTH + 10, 500 + BUTTON_HEIGHT/4);
+        titleText.render(SCREEN_WIDTH/2 - titleText.getWidth()/2,30);
+        eText.render(SCREEN_WIDTH/4 - BUTTON_WIDTH/2 + eButton.mDimension.w/2 - eText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
+        mText.render(SCREEN_WIDTH/2 - BUTTON_WIDTH/2 + mButton.mDimension.w/2 - mText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
+        hText.render(SCREEN_WIDTH * 3 / 4  - BUTTON_WIDTH/2 + hButton.mDimension.w/2 - hText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
     }
 
 };

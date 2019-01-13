@@ -11,8 +11,8 @@ extern SDL_Window* gWindow = NULL;
 extern TTF_Font *gFont = NULL;
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 990;
-const int SCREEN_HEIGHT = 660;
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
 
 //const int BUTTON_WIDTH = 300;
 //const int BUTTON_HEIGHT = 300;
