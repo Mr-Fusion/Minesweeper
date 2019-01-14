@@ -14,11 +14,6 @@ extern TTF_Font *gFont = NULL;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-//const int BUTTON_WIDTH = 300;
-//const int BUTTON_HEIGHT = 300;
-
-
-
 const int TILE_WIDTH = 32;
 const int TILE_HEIGHT = 32;
 

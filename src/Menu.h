@@ -14,20 +14,17 @@ class Menu : public GameState
     LButton mButton;
     LButton hButton;
 
-
-    //LTexture tileset;
     LTexture ButtonSpriteSheet;
 
     LTexture titleText;
-
     LTexture eText;
     LTexture mText;
     LTexture hText;
+    LTexture creditText;
 
     LTexture cautionBackdrop;
     LTexture menuPlate;
 
-    //Test Sprite Clips
     SDL_Rect ButtonSpriteClips[ BUTTON_SPRITE_NUM ];
 
     ///Constructor Function
@@ -43,7 +40,7 @@ class Menu : public GameState
         	//Initialize Menu here
             eButton = LButton(SCREEN_WIDTH/4 - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
         	mButton = LButton(SCREEN_WIDTH/2 - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
-            hButton = LButton(SCREEN_WIDTH * 3 / 4  - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
+            hButton = LButton(SCREEN_WIDTH*3/4 - BUTTON_WIDTH/2, 200, BUTTON_WIDTH, BUTTON_HEIGHT);
 
         	SDL_SetWindowSize(gWindow,SCREEN_WIDTH, SCREEN_HEIGHT);
         }
@@ -62,6 +59,7 @@ class Menu : public GameState
         eText.free();
         mText.free();
         hText.free();
+        creditText.free();
         cautionBackdrop.free();
         menuPlate.free();
 
@@ -116,7 +114,24 @@ class Menu : public GameState
             SDL_Color textColor = { 0, 0, 0 };
             if( !titleText.loadFromRenderedText( "Minesweeper", textColor ) )
             {
-                printf( "Failed to render text texture!\n" );
+                printf( "Failed to render title text!\n" );
+                success = false;
+            }
+        }
+
+        gFont = TTF_OpenFont( "assets/PressStart2P.ttf", 14 );
+        if( gFont == NULL )
+        {
+            printf( "Failed to load Minesweeper font! SDL_ttf Error: %s\n", TTF_GetError() );
+            success = false;
+        }
+        else
+        {
+            //Render text
+            SDL_Color textColor = { 0, 0, 0 };
+            if( !creditText.loadFromRenderedText( "By Joel Turner | Version: 1.0.0", textColor ) )
+            {
+                printf( "Failed to render credit text!\n" );
                 success = false;
             }
         }
@@ -133,17 +148,17 @@ class Menu : public GameState
             SDL_Color textColor = { 0, 0, 0 };
             if( !eText.loadFromRenderedText( "Easy", textColor ) )
             {
-                printf( "Failed to render text texture!\n" );
+                printf( "Failed to render eText!\n" );
                 success = false;
             }
             if( !mText.loadFromRenderedText( "Med", textColor ) )
             {
-                printf( "Failed to render text texture!\n" );
+                printf( "Failed to render mText!\n" );
                 success = false;
             }
             if( !hText.loadFromRenderedText( "Hard", textColor ) )
             {
-                printf( "Failed to render text texture!\n" );
+                printf( "Failed to render hText!\n" );
                 success = false;
             }
         }
@@ -158,27 +173,17 @@ class Menu : public GameState
         mButton.handleEvent(e);
         hButton.handleEvent(e);
 
-
-
-        if (eButton.isClicked){
-            //Something about state change flags here
-    		printf("CHANGE STATE\n");
+        if (eButton.isClicked)
             set_next_state(STATE_GAME_EASY);
-        }
-        if (mButton.isClicked){
-            //Something about state change flags here
-            printf("CHANGE STATE\n");
+
+        if (mButton.isClicked)
             set_next_state(STATE_GAME_MED);
-        }
-        if (hButton.isClicked){
-            //Something about state change flags here
-            printf("CHANGE STATE\n");
+
+        if (hButton.isClicked)
             set_next_state(STATE_GAME_HARD);
-        }
     }
 
     void logic(){
-    	//Handle actual state change here?
     	eButton.logic();
         mButton.logic();
         hButton.logic();
@@ -190,10 +195,11 @@ class Menu : public GameState
         eButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
         mButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
         hButton.render(ButtonSpriteClips, &ButtonSpriteSheet);
-        titleText.render(SCREEN_WIDTH/2 - titleText.getWidth()/2,30);
+        titleText.render(SCREEN_WIDTH/2 - titleText.getWidth()/2, 30);
         eText.render(SCREEN_WIDTH/4 - BUTTON_WIDTH/2 + eButton.mDimension.w/2 - eText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
         mText.render(SCREEN_WIDTH/2 - BUTTON_WIDTH/2 + mButton.mDimension.w/2 - mText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
-        hText.render(SCREEN_WIDTH * 3 / 4  - BUTTON_WIDTH/2 + hButton.mDimension.w/2 - hText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
+        hText.render(SCREEN_WIDTH*3/4 - BUTTON_WIDTH/2 + hButton.mDimension.w/2 - hText.getWidth()/2, 200 + BUTTON_HEIGHT + 10);
+        creditText.render(SCREEN_WIDTH/2 - creditText.getWidth()/2, SCREEN_HEIGHT - 60);
     }
 
 };

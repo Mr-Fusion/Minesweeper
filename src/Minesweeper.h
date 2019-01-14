@@ -37,7 +37,6 @@ class Minesweeper : public GameState
     LButton resetButton;
     LButton newButton;
 
-    //LTexture tileset;
     LTexture gSpriteSheetTexture;
     LTexture ResetSpriteSheet;
     LTexture NewSpriteSheet;
@@ -51,7 +50,6 @@ class Minesweeper : public GameState
 
     Grid *playField;
 
-    //Test Sprite Clips
     SDL_Rect gSpriteClips[ SPRITE_NUM ];
     SDL_Rect ResetSpriteClips[ BUTTON_SPRITE_NUM ];
     SDL_Rect NewSpriteClips[ BUTTON_SPRITE_NUM ];
@@ -79,7 +77,6 @@ class Minesweeper : public GameState
             textColor = { 255, 0, 0 };
 
             playField = new Grid(0, MENU_BAR_HEIGHT, col, row);
-            //playField.setPos(0,MENU_BAR_HEIGHT);
 
             menu_bar_width = col * TILE_WIDTH;
 
@@ -195,7 +192,7 @@ class Minesweeper : public GameState
         //Load sprite sheet texture
         if( !gSpriteSheetTexture.loadFromFile( "assets/minesweeper_tiles_32.png") )
         {
-            printf( "Failed to load sprite sheet texture!\n" );
+            printf( "Failed to load minesweeper sprite sheet texture!\n" );
             success = false;
         }
         else
@@ -215,7 +212,7 @@ class Minesweeper : public GameState
         //Load sprite sheet texture
         if( !ResetSpriteSheet.loadFromFile( "assets/reset_SS.png") )
         {
-            printf( "Failed to load sprite sheet texture!\n" );
+            printf( "Failed to load reset button sprite sheet texture!\n" );
             success = false;
         }
         else
@@ -235,7 +232,7 @@ class Minesweeper : public GameState
         //Load sprite sheet texture
         if( !NewSpriteSheet.loadFromFile( "assets/new_SS.png") )
         {
-            printf( "Failed to load sprite sheet texture!\n" );
+            printf( "Failed to load new button sprite sheet texture!\n" );
             success = false;
         }
         else
@@ -255,7 +252,7 @@ class Minesweeper : public GameState
         //Load sprite sheet texture
         if( !SmileySpriteSheet.loadFromFile( "assets/smiley_SS.png") )
         {
-            printf( "Failed to load sprite sheet texture!\n" );
+            printf( "Failed to load smiley sprite sheet texture!\n" );
             success = false;
         }
         else
@@ -363,14 +360,27 @@ class Minesweeper : public GameState
     }
 
     ///Routine for winning the game
-    ///Places flahs on all known mines
+    ///Places flags on all known mines
     void victory(void){
         for (int i = 0; i < col; i++){
             for (int j = 0; j < row; j++){
-                if ((fieldHidden[i][j] == MINE) && (fieldVisible[i][j] == UNKNOWN) )
+                if ((fieldHidden[i][j] == MINE) && (fieldVisible[i][j] == UNKNOWN) ){
                     fieldVisible[i][j] = FLAG;
+                    flags--;
+                }
             }
         }
+
+        //Set text to be rendered
+        flagText.str( "" );
+        flagText << flags;
+
+        //Render text
+        if( !flagTextTexture.loadFromRenderedText( flagText.str().c_str(), textColor ) )
+        {
+            printf( "Unable to render flag texture!\n" );
+        }
+
         update();
     }
 
@@ -397,17 +407,12 @@ class Minesweeper : public GameState
         newButton.handleEvent(e);
 
 
-
-        if (resetButton.isClicked){
-            printf("RESET\n");
+        //Check Button Flags
+        if (resetButton.isClicked)
             newGame();
-        }
 
-        if (newButton.isClicked){
-            //Something about state change flags here
-            printf("CHANGE STATE\n");
+        if (newButton.isClicked)
             set_next_state(STATE_MENU);
-        }
 
         //Refresh playing grid
         update();
@@ -463,7 +468,7 @@ class Minesweeper : public GameState
             //Render text
             if( !flagTextTexture.loadFromRenderedText( flagText.str().c_str(), textColor ) )
             {
-                printf( "Unable to render flag texture!\n" );
+                printf( "Unable to render flag text!\n" );
             }
 
             flagEnable = false;
@@ -477,7 +482,7 @@ class Minesweeper : public GameState
             //Render text
             if( !timeTextTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
             {
-                printf( "Unable to render time texture!\n" );
+                printf( "Unable to render time text!\n" );
             }
         }
     }
@@ -486,10 +491,9 @@ class Minesweeper : public GameState
         playField->render(gSpriteClips, &gSpriteSheetTexture);
         resetButton.render(ResetSpriteClips, &ResetSpriteSheet);
         newButton.render(ResetSpriteClips, &NewSpriteSheet);
-        timeTextTexture.render( 5, MENU_BAR_HEIGHT / 2 );
-        flagTextTexture.render( menu_bar_width - ( flagTextTexture.getWidth()), MENU_BAR_HEIGHT / 2 );
-
-        SmileySpriteSheet.render( menu_bar_width/2 - SPRITE_WIDTH/2 , MENU_BAR_HEIGHT/4, &SmileySpriteClips[ smileyMood ] );
+        timeTextTexture.render( 5, MENU_BAR_HEIGHT/2 );
+        flagTextTexture.render( menu_bar_width - ( flagTextTexture.getWidth() ), MENU_BAR_HEIGHT/2 );
+        SmileySpriteSheet.render( menu_bar_width/2 - SPRITE_WIDTH/2, MENU_BAR_HEIGHT/4, &SmileySpriteClips[ smileyMood ] );
     }
 
 };

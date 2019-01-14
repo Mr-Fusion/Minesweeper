@@ -1,26 +1,6 @@
 #ifndef BUTTON_H_INCLUDED
 #define BUTTON_H_INCLUDED
 
-// REMARKS: Defining all the desired properties of the button is overwhelming!!! Let's write out what we want:
-
-// Desired Behavior/Logic:
-// Button only activates if the mouse was pressed and released within the bounds of the button
-// If pressed inside, but released outside, no activation
-// If pressed outside, but released inside, no activation
-// If pressed and release outside, no activation (obviously)
-// If the cursor leaves the button after the press but returns before the release, that's an activation.
-
-// Desired Graphical:
-// Subtle highlight when mouse is hovering over (no click)
-// Heavy highlight when mouse was pressed in bounds, and is currently within bounds
-// No highlight (Default Texture) when mouse is outside bounds, or if mouse was pressed outside and has moved inside
-
-// Spritesheet: Default, highlight, press (3 sprites)
-
-// Functions (rough): 
-
-//Hmmm... that's it. (For now!)
-
 //The mouse button
 
 enum ButtonSprite
@@ -41,16 +21,14 @@ class LButton
 
         //Currently used global sprite
         ButtonSprite mCurrentSprite;
-
-        //LTexture spriteSheet;
-
         
+        //Flags
         bool press;
         bool inside;
         bool isClicked;
 
 
-        //Initializes internal variables
+        //Default constructor initializes all dimension variables to 0
         LButton(){
             mDimension.x = 0;
             mDimension.y = 0;
@@ -64,7 +42,7 @@ class LButton
             mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
         }
 
-                //Initializes internal variables
+        //Overloaded constructor initializes dimensions to specified value
         LButton(int xPos,int yPos,int w,int h){
             mDimension.x = xPos;
             mDimension.y = yPos;

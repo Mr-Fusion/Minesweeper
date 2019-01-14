@@ -19,9 +19,6 @@ bool init();
 //Frees media and shuts down SDL
 void close();
 
-//Globally used font
-//extern TTF_Font *gFont = NULL;
-
 GameState *currentState = NULL;
 
 /*GameState Stuff*/

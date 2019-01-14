@@ -24,17 +24,14 @@ class Grid
         //Grid array
         int **tiles;
 
-        //LTexture spriteSheet;
-
         ///Constructor Function
         Grid(){
             printf("Grid Object default constructor\n");
             //Initialize the size, location, dimensions and appearance of the grid
             rMax = GRID_HEIGHT_HARD;
-            cMax = GRID_WIDTH_HARD;     //Why doesn't the dynamic array destruct properly unless I parametrize it larger than I need to?
+            cMax = GRID_WIDTH_HARD;
             setPos(0,0);
             setDim(TILE_WIDTH,TILE_HEIGHT);
-            //spriteSheet = ss;
 
             //All grid tiles are set to 0 by default
             tiles = new int *[cMax];
@@ -54,7 +51,6 @@ class Grid
             cMax = w;//GRID_WIDTH;
             setPos(x,y);
             setDim(TILE_WIDTH,TILE_HEIGHT);
-            //spriteSheet = ss;
 
             //All grid tiles are set to 0 by default
             printf("Creating dynamic array in overload\n");
@@ -75,7 +71,6 @@ class Grid
 
             for(int i = 0; i < cMax; ++i) {
                 delete [] tiles[i];
-                //printf("debug point 0.5\n");
             }
             delete [] tiles;
             printf("debug point 1\n");
@@ -150,14 +145,6 @@ class Grid
                     spriteSheet->render( i * cWidth + xLoc, j * rHeight + yLoc, &sprite[tiles[i][j]]);
             }
         }
-
-        //Render specific tile of the grid
-        /*void renderTile(int x, int y, LTexture texture, SDL_Rect* sprite, int clip){
-            x = x * cWidth + xLoc;
-            y = y * rHeight + yLoc;
-            texture.render( x, y, &sprite[ clip ] );
-        }
-        */
 
 };
 
