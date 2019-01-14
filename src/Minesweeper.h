@@ -190,7 +190,7 @@ class Minesweeper : public GameState
         bool success = true;
 
         //Load sprite sheet texture
-        if( !gSpriteSheetTexture.loadFromFile( "assets/minesweeper_tiles_32.png") )
+        if( !gSpriteSheetTexture.loadFromFile( "../assets/minesweeper_tiles_32.png") )
         {
             printf( "Failed to load minesweeper sprite sheet texture!\n" );
             success = false;
@@ -210,7 +210,7 @@ class Minesweeper : public GameState
         }
 
         //Load sprite sheet texture
-        if( !ResetSpriteSheet.loadFromFile( "assets/reset_SS.png") )
+        if( !ResetSpriteSheet.loadFromFile( "../assets/reset_SS.png") )
         {
             printf( "Failed to load reset button sprite sheet texture!\n" );
             success = false;
@@ -230,7 +230,7 @@ class Minesweeper : public GameState
         }
 
         //Load sprite sheet texture
-        if( !NewSpriteSheet.loadFromFile( "assets/new_SS.png") )
+        if( !NewSpriteSheet.loadFromFile( "../assets/new_SS.png") )
         {
             printf( "Failed to load new button sprite sheet texture!\n" );
             success = false;
@@ -250,7 +250,7 @@ class Minesweeper : public GameState
         }
 
         //Load sprite sheet texture
-        if( !SmileySpriteSheet.loadFromFile( "assets/smiley_SS.png") )
+        if( !SmileySpriteSheet.loadFromFile( "../assets/smiley_SS.png") )
         {
             printf( "Failed to load smiley sprite sheet texture!\n" );
             success = false;

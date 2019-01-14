@@ -15,11 +15,11 @@ COMPILER_FLAGS = -w
 
 #LINKER_FLAGS specifies the libraries we're linking against
 LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer 
-LINKER_FLAGS_WIN = -lmingw32 -lSDL2main -mwindows -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer 
+LINKER_FLAGS_WIN = -static-libgcc -static-libstdc++ -lmingw32 -lSDL2main -mwindows -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer 
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = ../Minesweeper
-OBJ_NAME_WIN = ../windows/Minesweeper
+OBJ_NAME = ../linux/Minesweeper
+OBJ_NAME_WIN = ../win64/Minesweeper.exe
 
 #This is the target that compiles our executable
 all : $(OBJS)

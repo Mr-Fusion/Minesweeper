@@ -71,19 +71,19 @@ class Menu : public GameState
         bool success = true;
 
         //Load sprite sheet texture
-        if( !cautionBackdrop.loadFromFile( "assets/caution_background.png") )
+        if( !cautionBackdrop.loadFromFile( "../assets/caution_background.png") )
         {
             printf( "Failed to load caution texture!\n" );
             success = false;
         }
 
-        if( !menuPlate.loadFromFile( "assets/menu_plate.png") )
+        if( !menuPlate.loadFromFile( "../assets/menu_plate.png") )
         {
             printf( "Failed to load menu plate texture!\n" );
             success = false;
         }
 
-        if( !ButtonSpriteSheet.loadFromFile( "assets/button_SS.png") )
+        if( !ButtonSpriteSheet.loadFromFile( "../assets/button_SS.png") )
         {
             printf( "Failed to load sprite sheet texture!\n" );
             success = false;
@@ -102,7 +102,7 @@ class Menu : public GameState
             }
         }
         //Open the font
-        gFont = TTF_OpenFont( "assets/PixelSplitter-Bold.ttf", 60 );
+        gFont = TTF_OpenFont( "../assets/PixelSplitter-Bold.ttf", 60 );
         if( gFont == NULL )
         {
             printf( "Failed to load Minesweeper Title font! SDL_ttf Error: %s\n", TTF_GetError() );
@@ -119,7 +119,7 @@ class Menu : public GameState
             }
         }
 
-        gFont = TTF_OpenFont( "assets/PressStart2P.ttf", 14 );
+        gFont = TTF_OpenFont( "../assets/PressStart2P.ttf", 14 );
         if( gFont == NULL )
         {
             printf( "Failed to load Minesweeper font! SDL_ttf Error: %s\n", TTF_GetError() );
@@ -136,7 +136,7 @@ class Menu : public GameState
             }
         }
 
-        gFont = TTF_OpenFont( "assets/PressStart2P.ttf", 20 );
+        gFont = TTF_OpenFont( "../assets/PressStart2P.ttf", 20 );
         if( gFont == NULL )
         {
             printf( "Failed to load Minesweeper font! SDL_ttf Error: %s\n", TTF_GetError() );
