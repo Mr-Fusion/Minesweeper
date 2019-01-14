@@ -2,95 +2,158 @@
 #define BUTTON_H_INCLUDED
 
 //The mouse button
+
+enum ButtonSprite
+{
+    BUTTON_SPRITE_MOUSE_OUT = 0,
+    BUTTON_SPRITE_MOUSE_HOVER = 1,
+    BUTTON_SPRITE_MOUSE_OUT_PRESS = 2,
+    BUTTON_SPRITE_MOUSE_HOVER_PRESS = 3,
+    BUTTON_SPRITE_TOTAL = 4
+};
+
 class LButton
 {
     public:
 
-        //Top left position
-        SDL_Point mPosition;
+        //Top left position and dimensions
+        SDL_Rect mDimension;
 
         //Currently used global sprite
-        LButtonSprite mCurrentSprite;
+        ButtonSprite mCurrentSprite;
+        
+        //Flags
+        bool press;
+        bool inside;
+        bool isClicked;
 
 
-        //Initializes internal variables
+        //Default constructor initializes all dimension variables to 0
         LButton(){
-            mPosition.x = 0;
-            mPosition.y = 0;
+            mDimension.x = 0;
+            mDimension.y = 0;
+            mDimension.w = 0;
+            mDimension.h = 0;
+
+            inside = false;
+            press = false;
+            isClicked = false;
 
             mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
         }
 
+        //Overloaded constructor initializes dimensions to specified value
+        LButton(int xPos,int yPos,int w,int h){
+            mDimension.x = xPos;
+            mDimension.y = yPos;
+            mDimension.w = w;
+            mDimension.h = h;
+
+            inside = false;
+            press = false;
+            isClicked = false;
+
+            mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
+        }
+
+        ///Deconstructor
+        ~LButton(){
+            printf("Button Object Deconstructing...\n");
+
+            //Destroy button assets here
+
+        }
+
         //Sets top left position
         void setPosition( int x, int y ){
-            mPosition.x = x;
-            mPosition.y = y;
+            mDimension.x = x;
+            mDimension.y = y;
+        }
+
+        //Sets dimensions
+        void setDimension( int w, int h ){
+            mDimension.w = w;
+            mDimension.h = h;
         }
 
         //Handles mouse event
         void handleEvent( SDL_Event* e ){
             //If mouse event happened
-            if( e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN || e->type == SDL_MOUSEBUTTONUP )
+            if( e->type == SDL_MOUSEMOTION )
             {
                 //Get mouse position
                 int x, y;
                 SDL_GetMouseState( &x, &y );
 
                 //Check if mouse is in button
-                bool inside = true;
+                inside = true;
 
                 //Mouse is left of the button
-                if( x < mPosition.x )
+                if( x < mDimension.x )
                 {
                     inside = false;
                 }
                 //Mouse is right of the button
-                else if( x > mPosition.x + BUTTON_WIDTH )
+                else if( x > mDimension.x + mDimension.w )
                 {
                     inside = false;
                 }
                 //Mouse above the button
-                else if( y < mPosition.y )
+                else if( y < mDimension.y )
                 {
                     inside = false;
                 }
                 //Mouse below the button
-                else if( y > mPosition.y + BUTTON_HEIGHT )
+                else if( y > mDimension.y + mDimension.h )
                 {
                     inside = false;
                 }
+            }
 
-                //Mouse is outside button
-                if( !inside )
-                {
-                    mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
+            if (e->type == SDL_MOUSEBUTTONDOWN) {
+                if (inside) {
+                    press = true;
                 }
-                //Mouse is inside button
-                else
-                {
-                    //Set mouse over sprite
-                    switch( e->type )
-                    {
-                        case SDL_MOUSEMOTION:
-                        mCurrentSprite = BUTTON_SPRITE_MOUSE_OVER_MOTION;
-                        break;
+            } 
 
-                        case SDL_MOUSEBUTTONDOWN:
-                        mCurrentSprite = BUTTON_SPRITE_MOUSE_DOWN;
-                        break;
-
-                        case SDL_MOUSEBUTTONUP:
-                        mCurrentSprite = BUTTON_SPRITE_MOUSE_UP;
-                        break;
+            if ( e->type == SDL_MOUSEBUTTONUP  ) {
+                if (inside) {
+                    if (press) {
+                        isClicked = true;
                     }
                 }
+                press = false;
+            }
+        }
+
+        //Do Stuff
+        void logic(){
+            if (inside) {
+                mCurrentSprite = BUTTON_SPRITE_MOUSE_HOVER;
+                if (press) {
+                    mCurrentSprite = BUTTON_SPRITE_MOUSE_HOVER_PRESS;
+                }
+            }
+            else {
+                mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
+                if (press) {
+                    mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT_PRESS;
+                }
+            }
+
+            if (isClicked) {
+
+                //Do something...?
+
+                //Then reset button
+                isClicked = false;
             }
         }
 
         //Shows button sprite
-        void render(){
+        void render(SDL_Rect sprite[], LTexture *SpriteSheet){
             //Show current button sprite
-            gButtonSpriteSheetTexture.render( mPosition.x, mPosition.y, &gSpriteClips[ mCurrentSprite ] );
+            SpriteSheet->render( mDimension.x, mDimension.y, &sprite[ mCurrentSprite ] );
         }
 
 

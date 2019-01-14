@@ -1,7 +1,7 @@
 //Using SDL, SDL_image, standard IO, and strings
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <string>
 #include <ctime>
@@ -10,6 +10,8 @@
 #include "Grid.h"
 #include "Minesweeper.h"
 #include "LTexture.h"
+#include "GameState.h"
+#include "Menu.h"
 
 //Starts up SDL and creates window
 bool init();
@@ -17,21 +19,49 @@ bool init();
 //Frees media and shuts down SDL
 void close();
 
-//The window we'll be rendering to
-extern SDL_Window* gWindow = NULL;
+GameState *currentState = NULL;
 
-//Globally used font
-extern TTF_Font *gFont = NULL;
+/*GameState Stuff*/
 
-//The window renderer
-extern SDL_Renderer* gRenderer = NULL;
+void change_state()
+{
+    //If the state needs to be changed
+    if( nextState != STATE_NULL )
+    {
+        //Delete the current state
+        if( nextState != STATE_EXIT )
+        {
+            delete currentState;
+        }
 
-//Test Sprite Sheet
-LTexture gSpriteSheetTexture;
+        //Change the state
+        switch( nextState )
+        {
+            case STATE_MENU:
+                currentState = new Menu();
+                break;
 
-//Test Sprite Clips
-SDL_Rect gSpriteClips[ SPRITE_NUM ];
+            case STATE_GAME_EASY:
+                currentState = new Minesweeper(GRID_WIDTH_EASY, GRID_HEIGHT_EASY, MINE_NUM_EASY);
+                break;
 
+            case STATE_GAME_MED:
+                currentState = new Minesweeper(GRID_WIDTH_MED, GRID_HEIGHT_MED, MINE_NUM_MED);
+                break;
+
+            case STATE_GAME_HARD:
+                currentState = new Minesweeper(GRID_WIDTH_HARD, GRID_HEIGHT_HARD, MINE_NUM_HARD);
+                break;
+        }
+
+        //Change the current state ID
+        stateID = nextState;
+
+        //NULL the next state ID
+        nextState = STATE_NULL;
+    }
+}
+/*End GameState Stuff*/
 
 bool init()
 {
@@ -96,47 +126,9 @@ bool init()
 	return success;
 }
 
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-
-	//Load board texture
-	/*
-	if( !gBoardTexture.loadFromFile( "assets/Connect4Board.png" ) )
-	{
-		printf( "Failed to load sprite sheet texture!\n" );
-		success = false;
-	}
-	*/
-
-	//Load sprite sheet texture
-	if( !gSpriteSheetTexture.loadFromFile( gRenderer, "assets/minesweeper_tiles_3.png") )
-	{
-		printf( "Failed to load sprite sheet texture!\n" );
-		success = false;
-	}
-	else
-	{
-	    int n = 0;
-	    for (int i = 0; i < SS_COLUMNS; i++){
-            for (int j = 0; j < SS_ROWS; j++){
-                gSpriteClips[ n ].x = SPRITE_WIDTH * i;
-                gSpriteClips[ n ].y = SPRITE_HEIGHT * j;
-                gSpriteClips[ n ].w = SPRITE_WIDTH;
-                gSpriteClips[ n ].h = SPRITE_HEIGHT;
-                n++;
-            }
-	    }
-	}
-	return success;
-}
-
 void close()
 {
-
-    //Free loaded image
-	gSpriteSheetTexture.free();
+	delete currentState;
 
     //Free global font
     TTF_CloseFont( gFont );
@@ -163,74 +155,53 @@ int main( int argc, char* args[] )
 	}
 	else
 	{
-		//Load media
-		if( !loadMedia() )
-		{
-			printf( "Failed to load media!\n" );
-		}
-		else
-		{
-            //Initialize Minesweeper Field
-            Minesweeper mineField = Minesweeper(gSpriteSheetTexture);
+    	//Set the current state ID
+    	stateID = STATE_MENU;
 
-			//Main loop flag
-			bool quit = false;
+        //Initialize Minesweeper Field
+        currentState = new Menu();
 
-			//Gameplay Enable flag
-			bool gameOver = false;
+		//Main loop flag
+		bool quit = false;
 
-			//Event handler
-			SDL_Event e;
+		//Event handler
+		SDL_Event e;
 
-			//While application is running
+		//While application is running
 /**-----[GAME LOOP START!]-----**/
-			while( !quit )
-			{
+		while( !quit )
+		{
 /**-----[INPUT EVENTS]-----**/
-                //Handle events on queue
-                while( SDL_PollEvent( &e ) != 0 )
+            //Handle events on queue
+            while( SDL_PollEvent( &e ) != 0 )
+            {
+                //User requests quit
+                if( e.type == SDL_QUIT )
                 {
-                    //User requests quit
-                    if( e.type == SDL_QUIT )
-                    {
-                        quit = true;
-                    }
-                    if ( !gameOver){
-                        //testGrid.handleEvent( &e );
-                        mineField.handleEvent( &e );
-                    }
-
+                    quit = true;
                 }
-/**-----[LOGIC HANDLING]-----**/
-                if (mineField.sweepEnable){
-                    if ( !mineField.sweepTile(mineField.playField.col, mineField.playField.row) ){
-                        printf("YOU LOSE...\n");
-                        gameOver = true;
-                    }
-                    else{
-                        if ( mineField.unexploredTiles == mineField.mines){
-                            printf("YOU WIN!!!\n");
-                            gameOver = true;
-                        }
-                    }
-                    mineField.sweepEnable = false;
+                if ( !currentState->gameOver){
+                    currentState->handleEvent( &e );
                 }
-                if (mineField.flagEnable){
-                    mineField.mineFlagToggle(mineField.playField.col, mineField.playField.row);
-                    mineField.flagEnable = false;
-                }
-/**-----[RENDERING]-----**/
-                //Clear screen
-                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-                SDL_RenderClear( gRenderer );
 
-                //Render Grid
-                mineField.render( gSpriteClips );
-
-                //Update screen
-                SDL_RenderPresent( gRenderer );
             }
-		}
+/**-----[LOGIC HANDLING]-----**/
+            currentState->logic();
+        	
+        	//Change state if needed
+        	change_state();
+        	
+/**-----[RENDERING]-----**/
+            //Clear screen
+            SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+            SDL_RenderClear( gRenderer );
+
+            //Render Grid
+            currentState->render();
+
+            //Update screen
+            SDL_RenderPresent( gRenderer );
+        }
 	}
 
 	//Free resources and close SDL

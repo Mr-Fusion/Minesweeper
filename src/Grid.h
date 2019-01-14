@@ -1,7 +1,7 @@
 #ifndef GRID_H_INCLUDED
 #define GRID_H_INCLUDED
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "LTexture.h"
 #include "Const.h"
 
@@ -24,16 +24,14 @@ class Grid
         //Grid array
         int **tiles;
 
-        LTexture spriteSheet;
-
         ///Constructor Function
         Grid(){
+            printf("Grid Object default constructor\n");
             //Initialize the size, location, dimensions and appearance of the grid
-            rMax = GRID_HEIGHT;
-            cMax = GRID_WIDTH;
+            rMax = GRID_HEIGHT_HARD;
+            cMax = GRID_WIDTH_HARD;
             setPos(0,0);
             setDim(TILE_WIDTH,TILE_HEIGHT);
-            //spriteSheet = ss;
 
             //All grid tiles are set to 0 by default
             tiles = new int *[cMax];
@@ -46,9 +44,37 @@ class Grid
 
             selectTile(0,0);
         }
+        Grid(int x, int y, int w, int h){
+            printf("Grid Object overload constructor\n");
+            //Initialize the size, location, dimensions and appearance of the grid
+            rMax = h;//GRID_HEIGHT;
+            cMax = w;//GRID_WIDTH;
+            setPos(x,y);
+            setDim(TILE_WIDTH,TILE_HEIGHT);
+
+            //All grid tiles are set to 0 by default
+            printf("Creating dynamic array in overload\n");
+            tiles = new int *[cMax];
+            for (int i = 0; i < cMax; i++)
+                tiles[i] = new int[rMax];
+            for (int i = 0; i < cMax; i++) {
+                for (int j = 0; j < rMax; j++)
+                    tiles[i][j] = 0;
+            }
+
+            selectTile(0,0);
+        }
 
         ///Deconstructor
-        ~Grid(){}
+        ~Grid(){
+            printf("Grid Object Deconstructing...\n");
+
+            for(int i = 0; i < cMax; ++i) {
+                delete [] tiles[i];
+            }
+            delete [] tiles;
+            printf("debug point 1\n");
+        }
 
 		///Set Grid Position
 		void setPos(int x, int y){
@@ -112,21 +138,13 @@ class Grid
 		}
 
 		///Render the state of the playing grid
-        void render( SDL_Rect sprite[]){
+        void render( SDL_Rect sprite[],LTexture *spriteSheet){
             for (int i = 0; i < cMax; i++)
             {
                 for (int j = 0; j < rMax; j++)
-                    spriteSheet.render( i * cWidth + xLoc, j * rHeight + yLoc, &sprite[tiles[i][j]]);
+                    spriteSheet->render( i * cWidth + xLoc, j * rHeight + yLoc, &sprite[tiles[i][j]]);
             }
         }
-
-        //Render specific tile of the grid
-        /*void renderTile(int x, int y, LTexture texture, SDL_Rect* sprite, int clip){
-            x = x * cWidth + xLoc;
-            y = y * rHeight + yLoc;
-            texture.render( x, y, &sprite[ clip ] );
-        }
-        */
 
 };
 
